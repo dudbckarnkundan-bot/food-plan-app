@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Food Plan Simple</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#f4f1ea;color:#17130e;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif}
+.app{max-width:480px;margin:0 auto;min-height:100vh;background:linear-gradient(#fff7e8,#f3ede4);padding:16px 14px 100px}
+.top{position:sticky;top:0;z-index:10;background:#17130e;color:#fff;margin:-16px -14px 14px;padding:18px 16px 16px;border-bottom-left-radius:24px;border-bottom-right-radius:24px}
+h1{margin:0;font-size:28px;line-height:1}.sub{margin:6px 0 0;color:#d6c7b2;font-size:13px}
+.total{margin-top:16px;background:rgba(255,255,255,.1);border-radius:20px;padding:14px}
+.big{font-size:36px;font-weight:900}.row{display:flex;justify-content:space-between;gap:8px}.pill{background:#fff;color:#17130e;border-radius:14px;padding:9px 10px;text-align:center;flex:1}.pill b{display:block;font-size:16px}.pill span{font-size:11px;color:#807567;font-weight:700}
+.bar{height:10px;background:rgba(255,255,255,.16);border-radius:99px;margin:12px 0;overflow:hidden}.fill{height:100%;width:0;background:linear-gradient(90deg,#23734d,#d36b18)}
+.days{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;margin:12px 0 16px}.days button{text-align:center;background:#fff;border:1px solid #e3d8c7;color:#807567;border-radius:12px;padding:10px 0;font-weight:850;font-size:12px}.days button.active{background:#d36b18;border-color:#d36b18;color:#fff}
+.meal{background:#fff;border:1px solid #e3d8c7;border-radius:20px;margin-bottom:12px;overflow:hidden}.meal h2{margin:0;padding:13px 14px;background:#fffaf2;border-bottom:1px solid #e3d8c7;font-size:16px}.meal h2 span{float:right;color:#807567;font-size:12px;margin-top:2px}
+.dinner-day{display:none}.dinner-day.active{display:block}
+label{display:grid;grid-template-columns:30px 1fr auto;gap:8px;align-items:flex-start;padding:12px;border-bottom:1px solid #e3d8c7}label:last-child{border-bottom:0}input{width:22px;height:22px;accent-color:#23734d;margin-top:2px}.name{font-weight:850;font-size:15px}.desc{color:#807567;font-size:12px;margin-top:3px;line-height:1.35}.kcal{font-weight:900;color:#d36b18;font-size:13px;text-align:right}.done{opacity:.45}.done .name{text-decoration:line-through}
+.nav{position:fixed;left:14px;right:14px;bottom:max(12px,env(safe-area-inset-bottom));max-width:452px;margin:0 auto;background:#17130e;border-radius:24px;padding:9px;display:grid;grid-template-columns:repeat(3,1fr);gap:6px}.nav a{color:#c7b89f;text-decoration:none;text-align:center;font-weight:850;font-size:12px;padding:12px 6px;border-radius:16px}.nav a:first-child{background:#fff;color:#17130e}
+.note{color:#807567;font-size:12px;line-height:1.4;margin:8px 2px 14px}
+</style>
+</head>
+<body>
+<main class="app">
+  <section class="top" id="top">
+    <h1>Food Plan</h1>
+    <p class="sub">Offline checklist for iPhone</p>
+    <div class="total">
+      <div class="big"><span id="kcalTotal">0</span> kcal</div>
+      <div class="bar"><div class="fill" id="fill"></div></div>
+      <div class="row">
+        <div class="pill"><b id="proteinTotal">0g</b><span>protein</span></div>
+        <div class="pill"><b id="doneTotal">0</b><span>items done</span></div>
+        <div class="pill"><b id="leftTotal">3050</b><span>kcal left</span></div>
+      </div>
+    </div>
+  </section>
+
+  <div class="days">
+    <button class="active" type="button" data-day="mon">Mon</button>
+    <button type="button" data-day="tue">Tue</button>
+    <button type="button" data-day="wed">Wed</button>
+    <button type="button" data-day="thu">Thu</button>
+    <button type="button" data-day="fri">Fri</button>
+    <button type="button" data-day="sat">Sat</button>
+    <button type="button" data-day="sun">Sun</button>
+  </div>
+  <p class="note">Tap food items as you eat. This file works without API key, laptop server, or image detection.</p>
+
+  <section class="meal" id="daily">
+    <h2>Daily Base Foods <span>all days</span></h2>
+    <label><input type="checkbox" data-kcal="120" data-prot="4"><div><div class="name">5 soaked almonds + 5 soaked kaju</div><div class="desc">Soak overnight, drain, then eat</div></div><div class="kcal">120</div></label>
+    <label><input type="checkbox" data-kcal="210" data-prot="18"><div><div class="name">3 boiled eggs with black salt</div><div class="desc">Boil 8-10 min</div></div><div class="kcal">210</div></label>
+    <label><input type="checkbox" data-kcal="180" data-prot="2"><div><div class="name">2 bananas or seasonal fruit</div><div class="desc">Fast carbs for weight gain</div></div><div class="kcal">180</div></label>
+    <label><input type="checkbox" data-kcal="150" data-prot="8"><div><div class="name">1 glass warm cow milk + creatine + multivitamin</div><div class="desc">Morning milk</div></div><div class="kcal">150</div></label>
+    <label><input type="checkbox" data-kcal="180" data-prot="10"><div><div class="name">Soaked chana, 1 cup</div><div class="desc">With lemon + black salt</div></div><div class="kcal">180</div></label>
+    <label><input type="checkbox" data-kcal="120" data-prot="7"><div><div class="name">1 cup dahi</div><div class="desc">Plain curd</div></div><div class="kcal">120</div></label>
+    <label><input type="checkbox" data-kcal="60" data-prot="1"><div><div class="name">Guava, orange, or papaya</div><div class="desc">Seasonal fruit</div></div><div class="kcal">60</div></label>
+    <label><input type="checkbox" data-kcal="280" data-prot="38"><div><div class="name">150g boiled chicken or fish + 1 boiled egg</div><div class="desc">Lunch protein</div></div><div class="kcal">280</div></label>
+    <label><input type="checkbox" data-kcal="280" data-prot="5"><div><div class="name">2 cups boiled rice</div><div class="desc">Lunch rice</div></div><div class="kcal">280</div></label>
+    <label><input type="checkbox" data-kcal="180" data-prot="10"><div><div class="name">1 cup arhar, moong, or chana dal</div><div class="desc">Lunch dal</div></div><div class="kcal">180</div></label>
+    <label><input type="checkbox" data-kcal="110" data-prot="1"><div><div class="name">1 banana or fruit after lunch</div><div class="desc">Extra calories</div></div><div class="kcal">110</div></label>
+    <label><input type="checkbox" data-kcal="220" data-prot="4"><div><div class="name">4-5 soaked khajur + 10 soaked kaju</div><div class="desc">Pre-workout energy</div></div><div class="kcal">220</div></label>
+    <label><input type="checkbox" data-kcal="270" data-prot="32"><div><div class="name">1 glass milk + 1 scoop whey protein</div><div class="desc">Pre-workout protein</div></div><div class="kcal">270</div></label>
+    <label><input type="checkbox" data-kcal="160" data-prot="8"><div><div class="name">1 glass warm buffalo milk</div><div class="desc">Before sleep</div></div><div class="kcal">160</div></label>
+    <label><input type="checkbox" data-kcal="120" data-prot="4"><div><div class="name">5 soaked almonds + 3 soaked walnuts</div><div class="desc">Bedtime nuts</div></div><div class="kcal">120</div></label>
+  </section>
+
+  <section class="meal dinner-day active" id="mon"><h2>Monday Dinner <span>820 kcal</span></h2>
+    <label><input type="checkbox" data-kcal="280" data-prot="5"><div><div class="name">Rice bhat</div><div class="desc">2 cups plain rice</div></div><div class="kcal">280</div></label>
+    <label><input type="checkbox" data-kcal="130" data-prot="8"><div><div class="name">Moong dal</div><div class="desc">1 cup light dal</div></div><div class="kcal">130</div></label>
+    <label><input type="checkbox" data-kcal="130" data-prot="3"><div><div class="name">Aloo bhanta tarkari</div><div class="desc">Potato + eggplant</div></div><div class="kcal">130</div></label>
+    <label><input type="checkbox" data-kcal="60" data-prot="3"><div><div class="name">Rayo saag</div><div class="desc">Mustard greens</div></div><div class="kcal">60</div></label>
+    <label><input type="checkbox" data-kcal="220" data-prot="36"><div><div class="name">Boiled chicken</div><div class="desc">150g pieces</div></div><div class="kcal">220</div></label>
+  </section>
+
+  <section class="meal dinner-day" id="tue"><h2>Tuesday Dinner <span>845 kcal</span></h2>
+    <label><input type="checkbox" data-kcal="280" data-prot="5"><div><div class="name">Rice bhat</div><div class="desc">2 cups plain rice</div></div><div class="kcal">280</div></label>
+    <label><input type="checkbox" data-kcal="180" data-prot="10"><div><div class="name">Arhar dal</div><div class="desc">1 cup dal</div></div><div class="kcal">180</div></label>
+    <label><input type="checkbox" data-kcal="120" data-prot="5"><div><div class="name">Lauki chana tarkari</div><div class="desc">Bottle gourd + chana</div></div><div class="kcal">120</div></label>
+    <label><input type="checkbox" data-kcal="55" data-prot="3"><div><div class="name">Palungo saag</div><div class="desc">Spinach greens</div></div><div class="kcal">55</div></label>
+    <label><input type="checkbox" data-kcal="210" data-prot="27"><div><div class="name">Lean mutton</div><div class="desc">100g boiled</div></div><div class="kcal">210</div></label>
+  </section>
+
+  <section class="meal dinner-day" id="wed"><h2>Wednesday Dinner <span>870 kcal</span></h2>
+    <label><input type="checkbox" data-kcal="330" data-prot="6"><div><div class="name">Rice bhat</div><div class="desc">2.5 cups rice</div></div><div class="kcal">330</div></label>
+    <label><input type="checkbox" data-kcal="180" data-prot="10"><div><div class="name">Chana dal</div><div class="desc">1 cup dal</div></div><div class="kcal">180</div></label>
+    <label><input type="checkbox" data-kcal="130" data-prot="4"><div><div class="name">Cauli-aloo tarkari</div><div class="desc">Cauliflower + potato</div></div><div class="kcal">130</div></label>
+    <label><input type="checkbox" data-kcal="50" data-prot="3"><div><div class="name">Methi saag</div><div class="desc">Fenugreek greens</div></div><div class="kcal">50</div></label>
+    <label><input type="checkbox" data-kcal="180" data-prot="28"><div><div class="name">Steamed fish</div><div class="desc">150g Rohu/Catla</div></div><div class="kcal">180</div></label>
+  </section>
+
+  <section class="meal dinner-day" id="thu"><h2>Thursday Dinner <span>710 kcal</span></h2>
+    <label><input type="checkbox" data-kcal="280" data-prot="5"><div><div class="name">Rice bhat</div><div class="desc">2 cups rice</div></div><div class="kcal">280</div></label>
+    <label><input type="checkbox" data-kcal="160" data-prot="10"><div><div class="name">Masoor dal</div><div class="desc">1 cup red lentil dal</div></div><div class="kcal">160</div></label>
+    <label><input type="checkbox" data-kcal="110" data-prot="3"><div><div class="name">Bhindi tarkari</div><div class="desc">Okra curry</div></div><div class="kcal">110</div></label>
+    <label><input type="checkbox" data-kcal="55" data-prot="3"><div><div class="name">Chamsur saag</div><div class="desc">Local greens</div></div><div class="kcal">55</div></label>
+    <label><input type="checkbox" data-kcal="105" data-prot="6"><div><div class="name">Dahi</div><div class="desc">1 cup curd</div></div><div class="kcal">105</div></label>
+  </section>
+
+  <section class="meal dinner-day" id="fri"><h2>Friday Dinner <span>850 kcal</span></h2>
+    <label><input type="checkbox" data-kcal="280" data-prot="5"><div><div class="name">Rice bhat</div><div class="desc">2 cups rice</div></div><div class="kcal">280</div></label>
+    <label><input type="checkbox" data-kcal="170" data-prot="10"><div><div class="name">Mixed dal</div><div class="desc">Moong + masoor</div></div><div class="kcal">170</div></label>
+    <label><input type="checkbox" data-kcal="130" data-prot="3"><div><div class="name">Parwal-aloo tarkari</div><div class="desc">Pointed gourd + potato</div></div><div class="kcal">130</div></label>
+    <label><input type="checkbox" data-kcal="60" data-prot="3"><div><div class="name">Rayo saag</div><div class="desc">Mustard greens</div></div><div class="kcal">60</div></label>
+    <label><input type="checkbox" data-kcal="210" data-prot="22"><div><div class="name">Eggs or mutton</div><div class="desc">2 eggs or lean mutton</div></div><div class="kcal">210</div></label>
+  </section>
+
+  <section class="meal dinner-day" id="sat"><h2>Saturday Dinner <span>895 kcal</span></h2>
+    <label><input type="checkbox" data-kcal="330" data-prot="6"><div><div class="name">Rice bhat</div><div class="desc">2.5 cups rice</div></div><div class="kcal">330</div></label>
+    <label><input type="checkbox" data-kcal="130" data-prot="8"><div><div class="name">Moong dal</div><div class="desc">1 cup soft dal</div></div><div class="kcal">130</div></label>
+    <label><input type="checkbox" data-kcal="120" data-prot="3"><div><div class="name">Karela-aloo tarkari</div><div class="desc">Bitter gourd + potato</div></div><div class="kcal">120</div></label>
+    <label><input type="checkbox" data-kcal="55" data-prot="3"><div><div class="name">Palungo saag</div><div class="desc">Spinach greens</div></div><div class="kcal">55</div></label>
+    <label><input type="checkbox" data-kcal="260" data-prot="36"><div><div class="name">Chicken + egg</div><div class="desc">150g chicken + 1 egg</div></div><div class="kcal">260</div></label>
+  </section>
+
+  <section class="meal dinner-day" id="sun"><h2>Sunday Dinner <span>820 kcal</span></h2>
+    <label><input type="checkbox" data-kcal="280" data-prot="5"><div><div class="name">Rice bhat</div><div class="desc">2 cups rice</div></div><div class="kcal">280</div></label>
+    <label><input type="checkbox" data-kcal="180" data-prot="10"><div><div class="name">Arhar dal</div><div class="desc">1 cup dal</div></div><div class="kcal">180</div></label>
+    <label><input type="checkbox" data-kcal="130" data-prot="4"><div><div class="name">Mixed seasonal tarkari</div><div class="desc">Cabbage/carrot/beans/pumpkin</div></div><div class="kcal">130</div></label>
+    <label><input type="checkbox" data-kcal="60" data-prot="4"><div><div class="name">Moringa or available saag</div><div class="desc">Sajwan/rayo/palungo</div></div><div class="kcal">60</div></label>
+    <label><input type="checkbox" data-kcal="170" data-prot="26"><div><div class="name">Chicken or fish</div><div class="desc">100g boiled</div></div><div class="kcal">170</div></label>
+  </section>
+</main>
+<nav class="nav"><a href="#top">Top</a><a href="#daily">Daily</a><a href="#mon">Dinner</a></nav>
+<script>
+const target=3050;
+const boxes=[...document.querySelectorAll('input[type="checkbox"]')];
+let activeDay='mon';
+function save(){try{localStorage.setItem('simple-food-plan',JSON.stringify({checks:boxes.map(b=>b.checked),activeDay}))}catch(e){}}
+function load(){
+  try{
+    const saved=JSON.parse(localStorage.getItem('simple-food-plan')||'{}');
+    const checks=Array.isArray(saved)?saved:saved.checks;
+    if(saved.activeDay)activeDay=saved.activeDay;
+    if(Array.isArray(checks))checks.forEach((v,i)=>{if(boxes[i])boxes[i].checked=!!v});
+  }catch(e){}
+}
+function showDay(day){
+  activeDay=day;
+  document.querySelectorAll('.days button').forEach(btn=>btn.classList.toggle('active',btn.dataset.day===day));
+  document.querySelectorAll('.dinner-day').forEach(section=>section.classList.toggle('active',section.id===day));
+  save();
+}
+function update(){
+  let kcal=0,prot=0,done=0;
+  boxes.forEach(box=>{
+    box.closest('label').classList.toggle('done',box.checked);
+    if(box.checked){kcal+=Number(box.dataset.kcal||0);prot+=Number(box.dataset.prot||0);done++;}
+  });
+  document.getElementById('kcalTotal').textContent=Math.round(kcal);
+  document.getElementById('proteinTotal').textContent=Math.round(prot)+'g';
+  document.getElementById('doneTotal').textContent=done;
+  document.getElementById('leftTotal').textContent=Math.max(0,target-Math.round(kcal));
+  document.getElementById('fill').style.width=Math.min(100,kcal/target*100)+'%';
+  save();
+}
+document.querySelectorAll('.days button').forEach(btn=>{
+  btn.addEventListener('click',()=>showDay(btn.dataset.day));
+});
+boxes.forEach(box=>box.addEventListener('change',update));
+load();
+showDay(activeDay);
+update();
+</script>
+</body>
+</html>
