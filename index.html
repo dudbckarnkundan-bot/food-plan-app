@@ -129,25 +129,48 @@ label{display:grid;grid-template-columns:30px 1fr auto;gap:8px;align-items:flex-
 const target=3050;
 const boxes=[...document.querySelectorAll('input[type="checkbox"]')];
 let activeDay='mon';
+const saveKey='simple-food-plan-v3';
 function itemKey(box){
   const label=box.closest('label');
   const meal=box.closest('.meal')?.id||'daily';
   const name=label?.querySelector('.name')?.textContent?.trim()||'item';
   return `${meal}::${name}`;
 }
+function stateObject(){
+  return {checkedKeys:boxes.filter(b=>b.checked).map(itemKey),activeDay,updatedAt:new Date().toISOString()};
+}
+function setCookieState(state){
+  document.cookie=`${saveKey}=${encodeURIComponent(JSON.stringify(state))}; max-age=31536000; path=/; SameSite=Lax`;
+}
+function getCookieState(){
+  const found=document.cookie.split('; ').find(row=>row.startsWith(`${saveKey}=`));
+  return found?JSON.parse(decodeURIComponent(found.split('=').slice(1).join('='))):null;
+}
+function readSavedState(){
+  const raw=localStorage.getItem(saveKey)||localStorage.getItem('simple-food-plan-v2')||localStorage.getItem('simple-food-plan');
+  if(raw)return JSON.parse(raw);
+  return getCookieState()||{};
+}
 function save(){
-  const checkedKeys=boxes.filter(b=>b.checked).map(itemKey);
+  const state=stateObject();
   try{
-    localStorage.setItem('simple-food-plan-v2',JSON.stringify({checkedKeys,activeDay,updatedAt:new Date().toISOString()}));
-    localStorage.setItem('simple-food-plan',JSON.stringify({checkedKeys,activeDay}));
-    document.getElementById('saveStatus').textContent='Saved on this phone';
+    localStorage.setItem(saveKey,JSON.stringify(state));
+    localStorage.setItem('simple-food-plan-v2',JSON.stringify(state));
+    setCookieState(state);
+    const time=new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
+    document.getElementById('saveStatus').textContent=`Saved on this phone at ${time}`;
   }catch(e){
-    document.getElementById('saveStatus').textContent='Could not save. Turn off Private Browsing.';
+    try{
+      setCookieState(state);
+      document.getElementById('saveStatus').textContent='Saved with backup storage';
+    }catch(err){
+      document.getElementById('saveStatus').textContent='Could not save. Turn off Private Browsing.';
+    }
   }
 }
 function load(){
   try{
-    const saved=JSON.parse(localStorage.getItem('simple-food-plan-v2')||localStorage.getItem('simple-food-plan')||'{}');
+    const saved=readSavedState();
     const checkedKeys=saved.checkedKeys;
     const checks=Array.isArray(saved)?saved:saved.checks;
     if(saved.activeDay)activeDay=saved.activeDay;
@@ -157,7 +180,13 @@ function load(){
     }else if(Array.isArray(checks)){
       checks.forEach((v,i)=>{if(boxes[i])boxes[i].checked=!!v});
     }
-  }catch(e){}
+    if(saved.updatedAt){
+      const date=new Date(saved.updatedAt);
+      document.getElementById('saveStatus').textContent=`Restored saved food from ${date.toLocaleDateString()} ${date.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})}`;
+    }
+  }catch(e){
+    document.getElementById('saveStatus').textContent='No saved food found yet';
+  }
 }
 function showDay(day){
   activeDay=day;
