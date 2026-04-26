@@ -18,7 +18,7 @@ h1{margin:0;font-size:28px;line-height:1}.sub{margin:6px 0 0;color:#d6c7b2;font-
 .dinner-day{display:none}.dinner-day.active{display:block}
 label{display:grid;grid-template-columns:30px 1fr auto;gap:8px;align-items:flex-start;padding:12px;border-bottom:1px solid #e3d8c7}label:last-child{border-bottom:0}input{width:22px;height:22px;accent-color:#23734d;margin-top:2px}.name{font-weight:850;font-size:15px}.desc{color:#807567;font-size:12px;margin-top:3px;line-height:1.35}.kcal{font-weight:900;color:#d36b18;font-size:13px;text-align:right}.done{opacity:.45}.done .name{text-decoration:line-through}
 .nav{position:fixed;left:14px;right:14px;bottom:max(12px,env(safe-area-inset-bottom));max-width:452px;margin:0 auto;background:#17130e;border-radius:24px;padding:9px;display:grid;grid-template-columns:repeat(3,1fr);gap:6px}.nav a{color:#c7b89f;text-decoration:none;text-align:center;font-weight:850;font-size:12px;padding:12px 6px;border-radius:16px}.nav a:first-child{background:#fff;color:#17130e}
-.note{color:#807567;font-size:12px;line-height:1.4;margin:8px 2px 14px}
+.note{color:#807567;font-size:12px;line-height:1.4;margin:8px 2px 14px}.save-status{background:#eef8f1;border:1px solid #c8e6cf;color:#23734d;border-radius:14px;padding:9px 12px;font-size:12px;font-weight:800;margin:-4px 0 12px}
 </style>
 </head>
 <body>
@@ -47,6 +47,7 @@ label{display:grid;grid-template-columns:30px 1fr auto;gap:8px;align-items:flex-
     <button type="button" data-day="sun">Sun</button>
   </div>
   <p class="note">Tap food items as you eat. This file works without API key, laptop server, or image detection.</p>
+  <div class="save-status" id="saveStatus">Saved on this phone</div>
 
   <section class="meal" id="daily">
     <h2>Daily Base Foods <span>all days</span></h2>
@@ -128,13 +129,34 @@ label{display:grid;grid-template-columns:30px 1fr auto;gap:8px;align-items:flex-
 const target=3050;
 const boxes=[...document.querySelectorAll('input[type="checkbox"]')];
 let activeDay='mon';
-function save(){try{localStorage.setItem('simple-food-plan',JSON.stringify({checks:boxes.map(b=>b.checked),activeDay}))}catch(e){}}
+function itemKey(box){
+  const label=box.closest('label');
+  const meal=box.closest('.meal')?.id||'daily';
+  const name=label?.querySelector('.name')?.textContent?.trim()||'item';
+  return `${meal}::${name}`;
+}
+function save(){
+  const checkedKeys=boxes.filter(b=>b.checked).map(itemKey);
+  try{
+    localStorage.setItem('simple-food-plan-v2',JSON.stringify({checkedKeys,activeDay,updatedAt:new Date().toISOString()}));
+    localStorage.setItem('simple-food-plan',JSON.stringify({checkedKeys,activeDay}));
+    document.getElementById('saveStatus').textContent='Saved on this phone';
+  }catch(e){
+    document.getElementById('saveStatus').textContent='Could not save. Turn off Private Browsing.';
+  }
+}
 function load(){
   try{
-    const saved=JSON.parse(localStorage.getItem('simple-food-plan')||'{}');
+    const saved=JSON.parse(localStorage.getItem('simple-food-plan-v2')||localStorage.getItem('simple-food-plan')||'{}');
+    const checkedKeys=saved.checkedKeys;
     const checks=Array.isArray(saved)?saved:saved.checks;
     if(saved.activeDay)activeDay=saved.activeDay;
-    if(Array.isArray(checks))checks.forEach((v,i)=>{if(boxes[i])boxes[i].checked=!!v});
+    if(Array.isArray(checkedKeys)){
+      const keySet=new Set(checkedKeys);
+      boxes.forEach(box=>{box.checked=keySet.has(itemKey(box));});
+    }else if(Array.isArray(checks)){
+      checks.forEach((v,i)=>{if(boxes[i])boxes[i].checked=!!v});
+    }
   }catch(e){}
 }
 function showDay(day){
